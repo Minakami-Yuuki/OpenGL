@@ -6,6 +6,29 @@
 #include <sstream>
 #include <string>
 
+/* define a debugbreak */
+// the GLCall() you can use it to show debug Info for whatever's code you want
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__));
+
+/* check Error fuctions */
+static void GLClearError() 
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error] (" << error << "): " << function << "\n" << file << ":" << line << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 struct ShaderProgramSource
 {
     std::string VertexSource;
@@ -172,17 +195,17 @@ int main(void)
     };
 
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
+    GLCall(glGenBuffers(1, &buffer));
     /* use the function to start glDrawArrays() */
     /* use this to choose ID for what you want to Draw */
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     /* You should tell the Attributions to the OpenGL to use them in GPU */
     /* mean: start the first Vertex's Attribution */
-    glEnableVertexAttribArray(0);
+    GLCall(glEnableVertexAttribArray(0));
     /* set the Vertex's Attribution 
        index: 0                         (the first Attribution)
        size: 2                          (Only float x and float y)
@@ -191,15 +214,15 @@ int main(void)
        stride: sizeof(float) * 2        (it means: How many bytes from the first var to the second var) (float: 4 B/var)
        pointer: (const void *)0         (To show the position * sizeof(Byte) of Attribution var)
     */
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void *)0);
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void *)0));
 
     /* ibo: index buffer object */
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
+    GLCall(glGenBuffers(1, &ibo));
     /* use the function to start glDrawArrays() */
     /* use this to choose ID for what you want to Draw */
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
 
     /* TODO: Define the VertexShader and the FragmentShader (Fomulation) */
@@ -230,10 +253,11 @@ int main(void)
         glEnd();*/
 
         // Index buffer
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         // 
         // glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        GLClearError();
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
