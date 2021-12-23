@@ -12,6 +12,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "VertexBufferLayout.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -29,7 +30,7 @@ int main(void)
 
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Welcome to OpenGL!", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "Welcome to OpenGL!", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -52,33 +53,37 @@ int main(void)
     {
         /* produce the buffer to Draw graphics */
         float positions[] = {
-            //  put the Color
-            // -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // 0
-            //  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // 1
-            //  0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f   // 2
-            // -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f   // 3
+            // Texture: Left-Down is 0,0  ;  Right-Top is 1,1  ;
+             -0.5f, -0.5f, 0.0f, 0.0f,   // 0
+              0.5f, -0.5f, 1.0f, 0.0f,   // 1
+              0.5f,  0.5f, 1.0f, 1.0f,   // 2
+             -0.5f,  0.5f, 0.0f, 1.0f    // 3
 
-               -0.5f, -0.5f,   // 0
-               -0.5f,  0.5f,   // 1
-                0.0f,  0.0f,   // 2
-                0.5f, -0.5f,   // 3
-                0.5f,  0.5f    // 4
+          // -0.5f, -0.5f, 0.0f, 0.0f,   // 0
+          // -0.5f,  0.5f, 0.0f, 1.0f,   // 1
+          //  0.0f,  0.0f, 0.5f, 0.5f,   // 2
+          //  0.5f, -0.5f, 1.0f, 0.0f,   // 3 
+          //  0.5f,  0.5f, 1.0f, 1.0f    // 4
         };
 
         /* Use index buffer the draw a square (it can reduce GPUs occupancy rate) */
         unsigned int indices[] = {
             0, 1, 2,
-
-            2, 3, 4
+            2, 3, 0
+          //2, 3, 4
         };
 
         /* ::MAIN:: */
+
+        // To be continue...
+        //GLCall(glEnable(GL_BLEND));
+        //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         /* VertexArray (vao) */
         VertexArray va;
 
         /* VertexBuffer (vbo) */
-        VertexBuffer vb(positions, 5 * 2 * sizeof(float));
+        VertexBuffer vb(positions, 4 * 2 * 2 * sizeof(float));
 
         /* VertexLayout */
         VertexBufferLayout layout;
@@ -86,11 +91,12 @@ int main(void)
         /* Bind the vb and layout to the va */
         /* push(number): number means how many Elements in an attribution */
         layout.push<float>(2);
+        layout.push<float>(2);
         va.AddBuffer(vb, layout);
 
         /* Index Buffer Object (ibo) */
         IndexBuffer ib(indices, 6);
-
+         
 
         /* TODO: Define the VertexShader and the FragmentShader (Fomulation) */
         Shader shader("res/shaders/Basic.shader");
@@ -98,12 +104,19 @@ int main(void)
 
         /* Use the uniform to set the Fragment shader */
         shader.SetUniform4f("u_Color", 0.8f, 0.2f, 0.8f, 1.0f);
+        
+        /* Bind the picture that you want to be texture */
+        Texture texture("res/textures/Misaki2.png");
+        /* Bind the texture attribution */
+        // default: slot = 0
+        texture.Bind(/* 0 */);
+        shader.SetUniform1i("u_Texture", 0);    // 0 == slot
 
         /* TODO: Unbind everything (init) */
         va.Unbind();
-        shader.Unbind();
         vb.Unbind();
         ib.Unbind();
+        shader.Unbind();
 
         /* make Renderer */
         Renderer renderer;
@@ -145,7 +158,7 @@ int main(void)
             glfwPollEvents();
         }
 
-        // Destroy Shader (in Shader.cpp)
+        // Destroy Shader (in ~Shader.cpp)
         // GLCall(glDeleteProgram(shader));
     }
     glfwTerminate();

@@ -25,9 +25,9 @@ void VertexArray::Unbind() const
 void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
 {
     /* VAO (global) is to bind the VertexAttribArray */
-    /* So, you can use the vao to link different buffers!! */
+    /* So, you can use the vao to link different buffers!! (vao ¡ú vbo) */
 
-    // bind the VertexArray and the BertexBuffer
+    // bind the VertexArray and the VertexBuffer
     // Sequence: Bind vao / vbo / layout / ibo 
     // Eventually: Unbind vao.
 
